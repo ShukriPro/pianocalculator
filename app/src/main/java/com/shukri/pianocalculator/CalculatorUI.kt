@@ -17,10 +17,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 @Composable
+// UI Code
 fun CalculatorUI() {
     var displayValue by remember { mutableStateOf("0") }
-    var previousValue by remember { mutableStateOf("") }
-    var currentOperator by remember { mutableStateOf<String?>(null) }
+    val calculatorLogic = remember { CalculatorLogic() }
 
     val displayBackground = Color(0xFF2D2D2D)
     val operatorButtonColor = Color(0xFFFF9500)
@@ -105,50 +105,12 @@ fun CalculatorUI() {
                             backgroundColor = button.color,
                             modifier = Modifier.weight(button.span.toFloat())
                         ) {
-                            displayValue = when (button.text) {
-                                "C" -> {
-                                    previousValue = ""
-                                    currentOperator = null
-                                    "0"
-                                }
-                                "+", "-", "×", "÷" -> {
-                                    previousValue = displayValue
-                                    currentOperator = button.text
-                                    "0"
-                                }
-                                "=" -> {
-                                    if (previousValue.isNotEmpty() && currentOperator != null) {
-                                        val result = calculate(
-                                            previousValue.toDouble(),
-                                            displayValue.toDouble(),
-                                            currentOperator!!
-                                        )
-                                        previousValue = ""
-                                        currentOperator = null
-                                        result.toString()
-                                    } else {
-                                        displayValue
-                                    }
-                                }
-                                else -> {
-                                    if (displayValue == "0") button.text else displayValue + button.text
-                                }
-                            }
+                            displayValue = calculatorLogic.handleInput(button.text, displayValue)
                         }
                     }
                 }
             }
         }
-    }
-}
-
-private fun calculate(value1: Double, value2: Double, operator: String): Double {
-    return when (operator) {
-        "+" -> value1 + value2
-        "-" -> value1 - value2
-        "×" -> value1 * value2
-        "÷" -> if (value2 != 0.0) value1 / value2 else Double.NaN
-        else -> 0.0
     }
 }
 
@@ -197,7 +159,7 @@ private fun playButtonSound(buttonText: String, context: Context) {
         "5" -> "a4_1_1.ogg"
         "6" -> "b4_1.ogg"
         "7" -> "c5_1_1.ogg"
-        "8" -> "d5_1_1.ogg"
+        "8" -> "d5_1_cha1.ogg"
         "9" -> "e5_1.ogg"
         "C" -> "f5_1_1.ogg"
         "+" -> "a4_1_1.ogg"
@@ -205,6 +167,9 @@ private fun playButtonSound(buttonText: String, context: Context) {
         "×" -> "c5_1_1.ogg"
         "÷" -> "d5_1_1.ogg"
         "=" -> "e5_1.ogg"
+        "±" -> "f5_1_1.ogg"
+        "%" -> "g5_1_1.ogg"
+        "." -> "a5_1_1.ogg"
         else -> null
     }
 
@@ -217,12 +182,6 @@ private fun playButtonSound(buttonText: String, context: Context) {
         }
     }
 }
-
-private data class ButtonData(
-    val text: String,
-    val color: Color,
-    val span: Int = 1
-)
 
 @Preview(showBackground = true)
 @Composable
